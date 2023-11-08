@@ -11,41 +11,56 @@ def inventory_report(): # This function gives the user a report of the inventory
     with open('inventory.csv', 'r', newline='') as inventory:
         reader = csv.reader(inventory)
     
-        for line in reader:
-         print(line)
+        for row in reader:
+         print(row)
 
 def sales_report(): # This function gives the user a report of the sales ledger
     with open('sales.csv', 'r', newline='') as sales:
         reader = csv.reader(sales)
     
-        for line in reader:
-         print(line)
+        for row in reader:
+         print(row)
 
+def product_report(): # This function gives the user a report of the inventory ledger 
+    amounts = {}
+
+    with open('inventory.csv', 'r', newline='') as inventory:
+        reader = csv.DictReader(inventory)
+    
+        for row in reader:
+            product_name = row["product_name"]
+            if product_name in amounts:
+                amounts[product_name] += 1
+            else:
+                amounts[product_name] = 1 
+
+    return print(amounts)
+    
 def revenue_report(): # This function gives the user a report of the revenue 
-     revenue = 0
+    revenue = 0
 
-     with open('sales.csv', 'r', newline='') as sales:
+    with open('sales.csv', 'r', newline='') as sales:
         reader = csv.DictReader(sales)
 
         for row in reader:
             revenue += float(row['sell_price'])
 
-     return print(revenue)
+    return print(revenue)
 
 def profit_report(): # This function gives the user a report of the profit 
-     profit = 0 
-     revenue = 0 
-     cogs = 0 
+    profit = 0 
+    revenue = 0 
+    cogs = 0 
 
-     with open('sales.csv', 'r', newline='') as sales:
+    with open('sales.csv', 'r', newline='') as sales:
         reader = csv.DictReader(sales)
     
         for row in reader:
          revenue += float(row['sell_price'])
          cogs += float(row['buy_price'])
 
-     profit = revenue - cogs
-     return print(profit)
+    profit = revenue - cogs
+    return print(profit)
 
 if __name__ == "__main__":
     main()

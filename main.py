@@ -29,29 +29,34 @@ operation_parser.add_argument("operation_type", type=str, help= "specify the typ
 operation_parser.add_argument("--product_name", type=str, help="specify the name of the product")
 operation_parser.add_argument("--buy_price", type=float, help="specify the price for which the product is bought as a float (decimal number)")
 operation_parser.add_argument("--sell_price", type=float, help="specify the price for which the product is sold as a float (decimal number)")
-operation_parser.add_argument("--experation_date", type=str, help="specify the experation date of the product")
-operation_parser.add_argument("--id", type=str,help= "specify the id number")
-
+operation_parser.add_argument("--expiration_date", type=str, help="specify the experation date of the product")
+operation_parser.add_argument("--id", type=int,help= "specify the id number")
+operation_parser.add_argument("--buy_date", type=str,help= "specify the date on which the item was bought")
 
 args = parser.parse_args()
-    
+
+# if statments related to the report subparser after choosing report the users has to specify what report they would like to see
 if args.command == "report":
-    if args.report_type == "inventory":
+    if args.report_type == "inventory": #provides a report on all entries in the inventory ledger at a given moment
         outcome = inventory_report()
-    if args.report_type == "sales":
+    if args.report_type == "sales": #provides a report on all entries in the sales ledger at a given moment
         outcome = sales_report()
-    if args.report_type == "revenue":
+    if args.report_type == "product": #provides a report on what products are held and how many of them are held at a given moment
+        outcome = product_report()
+    if args.report_type == "revenue": #provides a report on the revenue at a given moment 
         outcome = revenue_report()
-    if args.report_type == "profit":
+    if args.report_type == "profit": #provides a report on the profit at a given moment
         outcome = profit_report()
 
+# if statements related to operation subparser users have to choose the operatioon they want to perfom 
+# There are also several optional arguments that can be used based on the type of operation you want to perform
 if args.command == "operation":
     if args.operation_type == "buy":
-         outcome = buy_inventory(args.product_name, args.buy_price, args.experation_date)
+         outcome = buy_inventory(args.product_name, args.buy_price, args.expiration_date)
     if args.operation_type == "sell":
         outcome = sell_inventory(args.product_name, args.sell_price)
     if args.operation_type =="change":
-        outcome = change_data_inventory(args.id)
+        outcome = change_data_inventory(args.id, args.product_name, args.buy_date, args.buy_price, args.expiration_date)
     if args.operation_type == "delete":
         outcome = delete_inventory(args.id)
         

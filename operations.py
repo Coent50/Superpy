@@ -14,8 +14,9 @@ def buy_inventory(product_name,buy_price, expiration_date): # This function enab
 
         buy_date = date.today()
 
+        # Finding the highest id currently in the inventory ledger
         max_id = 0
-        for row in rows: # Finds the highest id number currently in the inventory file
+        for row in rows: 
             if int(row["id"]) > max_id:
                 max_id = int(row["id"])
 
@@ -29,51 +30,49 @@ def buy_inventory(product_name,buy_price, expiration_date): # This function enab
         writer.writerows(rows)
 
 def sell_inventory(product_name, sell_price): # this function allows the user to sell inventory and moves the product to the sales ledger
-    # opening both the sales and the inventory id with r+ as both need to accessed and changed
     with open('sales.csv', 'r+', newline='') as sales:
         sales_reader = csv.DictReader(sales)
         sales_rows = list(sales_reader)
 
-    with open('inventory.csv', 'r+', newline='') as inventory:
-        inventory_reader = csv.DictReader(inventory)
-        inventory_rows = list(inventory_reader)
-
+        # Finding the highest sales-id currently in the sales ledger
         max_sales_id = 0
-        for row in sales_rows: # Finds the highest id number currently in the sales file
+        for row in sales_rows: 
             if int(row["sales_id"]) > max_sales_id:
                 max_sales_id = int(row["sales_id"])
         new_sales_id = max_sales_id + 1
 
-        sell_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #sets the sell date to the date on which the sale is executed
+        sell_date = date.today().strftime('%Y-%m-%d') #sets the sell date to the date on which the sale is executed
 
         sold_item = False
-        for row in inventory_rows:
-            if row["product_name"] == product_name:
-                inventory_id = row["id"]
-                buy_price = row["buy_price"]
-        
-                new_row = {'sales_id': new_sales_id,'inventory_id': inventory_id, 'product_name': product_name, 'sell_date': sell_date, 'sell_price' : sell_price, 'buy_price': buy_price,}
-                sales_rows.append(new_row)
-                sold_item = True
+        with open('inventory.csv', 'r+', newline='') as inventory:
+            inventory_reader = csv.DictReader(inventory)
+            inventory_rows = list(inventory_reader)
 
-        if sold_item:
-         with open('sales.csv', 'r+', newline='') as sales:
-          sales_reader = csv.DictReader(sales)
-          sales_rows = list(sales_reader)
-          sales_writer = csv.DictWriter(sales, fieldnames=sales_reader.fieldnames)
-          sales_writer.writeheader()
-          sales_writer.writerows(sales_rows)
+            inventory_rows_updated =[]
+            for row in inventory_rows:
+                if row["product_name"] == product_name and not sold_item:
+                    inventory_id = row["id"]
+                    buy_price = row["buy_price"]
+                    new_row = {'sales_id': new_sales_id,'inventory_id': inventory_id, 'product_name': product_name, 'sell_date': sell_date, 'sell_price' : sell_price, 'buy_price': buy_price,}
+                    sales_rows.append(new_row)
+                    sold_item = True
+                else:
+                    inventory_rows_updated.append(row)
 
-         with open('inventory.csv', 'r+', newline='') as inventory:
-          inventory_reader = csv.DictReader(inventory)
-          inventory_rows = list(inventory_reader)
-          inventory_writer = csv.DictWriter(inventory, fieldnames=inventory_reader.fieldnames)
-          inventory_writer.writeheader()
-          for row in inventory_rows:
-              if row["product_name"] != product_name:
-                 inventory_writer.writerows(inventory_rows)
+            if sold_item:
+             sales.seek(0)
+             sales_writer = csv.DictWriter(sales, fieldnames=sales_reader.fieldnames)
+             sales_writer.writeheader()
+             sales_writer.writerows(sales_rows)
+
+             inventory.seek(0)
+             inventory_writer = csv.DictWriter(inventory, fieldnames=inventory_reader.fieldnames)
+             inventory_writer.writeheader()
+             inventory_writer.writerows(inventory_rows_updated)
+             inventory.truncate() #truncate method clears the file from any old data making sure only the updated entry is included in the inventory 
 
 def change_data_inventory(id,product_name,buy_date,buy_price,expiration_date): # This function enables the user to change data in the inventory
+   id = str(id)
    with open ('inventory.csv', 'r+', newline='') as inventory:
         reader = csv.DictReader(inventory)
         rows =list(reader)
@@ -84,7 +83,7 @@ def change_data_inventory(id,product_name,buy_date,buy_price,expiration_date): #
                 row["buy_date"] = buy_date
                 row["buy_price"] = buy_price
                 row["expiration_date"] = expiration_date
-            break
+                break
 
         inventory.seek(0)
         writer = csv.DictWriter(inventory, fieldnames= reader.fieldnames)
@@ -105,9 +104,10 @@ def delete_inventory(id):
             if row["id"] != id:
                 writer.writerow(row)
 
-        inventory.truncate()
+        inventory.truncate() #truncate method clears the file from any old data making sure only the updated entry is included in the inventory 
 
 if __name__ == "__main__":
     main()
-buy_inventory('knakworst','3','2025-01-01')
+
+
 
