@@ -35,6 +35,18 @@ def product_report(): # This function gives the user a report of the inventory l
                 amounts[product_name] = 1 
 
     return print(amounts)
+
+def expired_report(): # This function gives the user a report of the expired items in the inventory ledger 
+
+    with open('inventory.csv', 'r', newline='') as inventory:
+        reader = csv.DictReader(inventory)
+
+        date_today = date.today().strftime('%Y-%m-%d')
+    
+        for row in reader:
+          expiration_date = row["expiration_date"]
+          if expiration_date < date_today:
+            print(row)
     
 def revenue_report(): # This function gives the user a report of the revenue 
     revenue = 0

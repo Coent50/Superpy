@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import *
 
 #This file contains the functions needed to perfom various operational activities
 
@@ -12,7 +12,7 @@ def buy_inventory(product_name,buy_price, expiration_date): # This function enab
         reader = csv.DictReader(inventory)
         rows = list(reader)
 
-        buy_date = date.today()
+        buy_date = date.today().strftime('%Y-%m-%d')
 
         # Finding the highest id currently in the inventory ledger
         max_id = 0
@@ -49,17 +49,28 @@ def sell_inventory(product_name, sell_price): # this function allows the user to
             inventory_rows = list(inventory_reader)
 
             inventory_rows_updated =[]
+
+            in_stock = False
             for row in inventory_rows:
                 if row["product_name"] == product_name and not sold_item:
-                    inventory_id = row["id"]
-                    buy_price = row["buy_price"]
-                    new_row = {'sales_id': new_sales_id,'inventory_id': inventory_id, 'product_name': product_name, 'sell_date': sell_date, 'sell_price' : sell_price, 'buy_price': buy_price,}
-                    sales_rows.append(new_row)
-                    sold_item = True
+                    in_stock = True
+                    expiration_date = row["expiration_date"]
+                    expired = expiration_date < sell_date
+
+                    if not expired:
+                     inventory_id = row["id"]
+                     buy_price = row["buy_price"]
+                     new_row = {'sales_id': new_sales_id,'inventory_id': inventory_id, 'product_name': product_name, 'sell_date': sell_date, 'sell_price' : sell_price, 'buy_price': buy_price,}
+                     sales_rows.append(new_row)
+                     sold_item = True
                 else:
                     inventory_rows_updated.append(row)
 
-            if sold_item:
+            if not in_stock:
+                print("ERROR: This product is out of stock")
+            elif not sold_item:
+                print("ERROR: This product has expired and can therefore not be sold")
+            else:
              sales.seek(0)
              sales_writer = csv.DictWriter(sales, fieldnames=sales_reader.fieldnames)
              sales_writer.writeheader()
@@ -91,7 +102,7 @@ def change_data_inventory(id,product_name,buy_date,buy_price,expiration_date): #
         writer.writerows(rows)
 
 def delete_inventory(id):
-    id = str(id)
+    id =str(id)
     with open('inventory.csv', 'r+', newline='') as inventory:
         reader = csv.DictReader(inventory)
         rows = list(reader)
@@ -105,6 +116,17 @@ def delete_inventory(id):
                 writer.writerow(row)
 
         inventory.truncate() #truncate method clears the file from any old data making sure only the updated entry is included in the inventory 
+
+
+def advance_time (days: int):
+    with open('time.txt', 'r') as time:
+        currect_date = time.readline()
+        begin_date = datetime.strptime(currect_date, '%Y-%m-%d')
+        delta = timedelta(days=days)
+        new_date = begin_date + delta
+
+    with open('time.txt', 'w') as time:
+        time.write(new_date.strftime('%Y-%m-%d'))
 
 if __name__ == "__main__":
     main()

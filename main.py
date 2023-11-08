@@ -14,6 +14,7 @@ __human_name__ = "superpy"
 def main():
     pass
 
+
 # parser to make program accessible through the CLI
 parser = argparse.ArgumentParser(description="Welcome to superpy", epilog="Superpy is an inventory and sales management tool", add_help= True)
 sub_parser = parser.add_subparsers(dest = "command", help="specify what operation you want superpy to perform")
@@ -43,6 +44,8 @@ if args.command == "report":
         outcome = sales_report()
     if args.report_type == "product": #provides a report on what products are held and how many of them are held at a given moment
         outcome = product_report()
+    if args.report_type == "expired": #provides a report on which items have expired
+        outcome = expired_report()
     if args.report_type == "revenue": #provides a report on the revenue at a given moment 
         outcome = revenue_report()
     if args.report_type == "profit": #provides a report on the profit at a given moment
