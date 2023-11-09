@@ -47,9 +47,9 @@ if args.command == "report":
     if args.report_type == "expired": #provides a report on which items have expired
         outcome = expired_report()
     if args.report_type == "revenue": #provides a report on the revenue at a given moment 
-        outcome = revenue_report()
+        outcome = revenue_report(args.date)
     if args.report_type == "profit": #provides a report on the profit at a given moment
-        outcome = profit_report()
+        outcome = profit_report(args.date)
 
 # if statements related to operation subparser users have to choose the operatioon they want to perfom 
 # There are also several optional arguments that can be used based on the type of operation you want to perform
