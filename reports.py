@@ -1,5 +1,7 @@
 import csv
 from datetime import *
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 
 # This file contains the functions needed to produce various reports
@@ -77,34 +79,48 @@ def profit_report(sell_date=None): # This function gives the user a report on th
     profit = revenue - cogs
     return print(profit)
 
-def monthly_report(month):
+def monthly_report(period:str):
     profit = 0 
     revenue = 0 
-    cogs = 0 
+    cogs = 0
+    report_period = ''
 
     with open('sales.csv', 'r', newline='') as sales:
         reader = csv.DictReader(sales)
 
         for row in reader:
             sell_date = row["sell_date"]
-            sell_month = sell_date[:7] #slicing the str of sell date to only get the year and month 
-            if month == sell_month:
+            sell_period = sell_date[:7] #slicing the str of sell date to only get the year and month 
+            if period == sell_period:
                 revenue += float(row['sell_price'])
                 cogs += float(row['buy_price'])
+                report_period = datetime.strptime(sell_period,'%Y-%m').strftime('%B %Y')
 
     profit = revenue - cogs
     profit_margin = round((profit/revenue) * 100, 1) if revenue != 0 else 0 
 
-    report_month = datetime.strptime(sell_month,'%Y-%m').strftime('%B %Y')
-
-    report = f"""Dear stakeholder we are pleased to announce that {report_month} was another spectacular month. 
+    
+    report_content = f"""Dear stakeholder we are pleased to announce that {report_period} was another spectacular month. 
     Due to new negotiations with our suppliers we have realised very favourable buying prices. 
     This has led to a cost of goods sold of: {cogs}. Whilst being able to reduce buying prices, 
     we were on the other side able to squeeze more out of our customers. 
     This has led to revenue of: {revenue} and a profit of: {profit}. 
     With that we are pleased to report a profit margin of {profit_margin} percent."""
 
-    return print(report)
+    lines = report_content.split('\n')
+    report = canvas.Canvas(f"Monthly Report {report_period}.pdf", pagesize= letter)
+    text = report.beginText(100, 750)
+    text.setFont("Times-Roman", 12)
+
+    for line in lines:
+        text.textLine(line)
+
+    report.drawText(text)
+    report.save()
+    
+   
+
+ 
     
 
 
@@ -112,4 +128,4 @@ def monthly_report(month):
 if __name__ == "__main__":
     main()
 
-monthly_report('2023-11')
+

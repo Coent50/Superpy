@@ -23,6 +23,7 @@ sub_parser = parser.add_subparsers(dest = "command", help="specify what operatio
 report_parser = sub_parser.add_parser("report", help="enables the user to select a number of different reports")
 report_parser.add_argument("report_type", type=str, help="specify the type of report you want to acces")
 report_parser.add_argument("--date", type=str, help="specify the date on which superpy needs to report")
+report_parser.add_argument("--period", type=str, help="specify the year followed by the month for which you would like to access the monthly reporty")
 
 # operation subparser enables the user to buy/sell/change inventory 
 operation_parser = sub_parser.add_parser ("operation", help="enables the user to perfom a set of operations")
@@ -50,6 +51,8 @@ if args.command == "report":
         outcome = revenue_report(args.date)
     if args.report_type == "profit": #provides a report on the profit at a given moment
         outcome = profit_report(args.date)
+    if args.report_type == "monthly":
+        outcome = monthly_report(args.period)
 
 # if statements related to operation subparser users have to choose the operatioon they want to perfom 
 # There are also several optional arguments that can be used based on the type of operation you want to perform
