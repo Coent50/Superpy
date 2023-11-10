@@ -28,6 +28,7 @@ def buy_inventory(product_name,buy_price, expiration_date): # This function enab
         writer = csv.DictWriter(inventory, fieldnames=reader.fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+    return product_name
 
 def sell_inventory(product_name, sell_price): # this function allows the user to sell inventory and moves the product to the sales ledger
     with open('sales.csv', 'r+', newline='') as sales:
@@ -82,9 +83,49 @@ def sell_inventory(product_name, sell_price): # this function allows the user to
              inventory_writer.writerows(inventory_rows_updated)
              inventory.truncate() #truncate method clears the file from any old data making sure only the updated entry is included in the inventory 
 
+    return product_name
+
+def remove_obsolete_inventory():
+    with open('obsolete_inventory.csv', 'r+', newline='') as obs:
+        obs_reader = csv.DictReader(obs)
+        obs_rows = list(obs_reader)
+
+        today = date.today().strftime('%Y-%m-%d') 
+        period = today[:7]
+
+        with open('inventory.csv', 'r+', newline='') as inventory:
+            inventory_reader = csv.DictReader(inventory)
+            inventory_rows = list(inventory_reader)
+
+            inventory_rows_updated =[]
+
+            for row in inventory_rows:
+                    expiration_date = row["expiration_date"]
+                    expired = expiration_date < today
+
+                    if expired:
+                     inventory_id = row["id"]
+                     product_name = row ["product_name"]
+                     buy_price = row["buy_price"]
+                     new_row = {'inventory_id': inventory_id, 'product_name': product_name,'period': period,'buy_price': buy_price, 'expiration_date' : expiration_date}
+                     obs_rows.append(new_row)
+                    else:
+                     inventory_rows_updated.append(row)
+
+            obs.seek(0)
+            obs_writer = csv.DictWriter(obs, fieldnames=obs_reader.fieldnames)
+            obs_writer.writeheader()
+            obs_writer.writerows(obs_rows)
+
+            inventory.seek(0)
+            inventory_writer = csv.DictWriter(inventory, fieldnames=inventory_reader.fieldnames)
+            inventory_writer.writeheader()
+            inventory_writer.writerows(inventory_rows_updated)
+            inventory.truncate()
+
 def change_data_inventory(id,product_name,buy_date,buy_price,expiration_date): # This function enables the user to change data in the inventory
-   id = str(id)
-   with open ('inventory.csv', 'r+', newline='') as inventory:
+    id = str(id)
+    with open ('inventory.csv', 'r+', newline='') as inventory:
         reader = csv.DictReader(inventory)
         rows =list(reader)
 
@@ -100,6 +141,7 @@ def change_data_inventory(id,product_name,buy_date,buy_price,expiration_date): #
         writer = csv.DictWriter(inventory, fieldnames= reader.fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+    return id
 
 def delete_inventory(id):
     id =str(id)
@@ -116,6 +158,7 @@ def delete_inventory(id):
                 writer.writerow(row)
 
         inventory.truncate() #truncate method clears the file from any old data making sure only the updated entry is included in the inventory 
+    return id
 
 
 def advance_time (days: int):

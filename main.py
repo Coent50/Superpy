@@ -1,6 +1,8 @@
 # Imports
 import argparse
 import csv
+from rich.console import Console
+from rich.table import Table
 from datetime import date
 from reports import *
 from operations import *
@@ -14,6 +16,7 @@ __human_name__ = "superpy"
 def main():
     pass
 
+console = Console()
 
 # parser to make program accessible through the CLI
 parser = argparse.ArgumentParser(description="Welcome to superpy", epilog="Superpy is an inventory and sales management tool", add_help= True)
@@ -53,18 +56,26 @@ if args.command == "report":
         outcome = profit_report(args.date)
     if args.report_type == "monthly":
         outcome = monthly_report(args.period)
+        console.print(f"[bold green]Your report was created succesfully and has been stored in the current working directory")
 
 # if statements related to operation subparser users have to choose the operatioon they want to perfom 
 # There are also several optional arguments that can be used based on the type of operation you want to perform
 if args.command == "operation":
     if args.operation_type == "buy":
          outcome = buy_inventory(args.product_name, args.buy_price, args.expiration_date)
+         console.print(f"[bold green]Successfully bought[/bold green]: {outcome}")
     if args.operation_type == "sell":
         outcome = sell_inventory(args.product_name, args.sell_price)
+        console.print(f"[bold blue]Successfully sold[/bold blue]: {outcome}")
     if args.operation_type =="change":
         outcome = change_data_inventory(args.id, args.product_name, args.buy_date, args.buy_price, args.expiration_date)
+        console.print(f"[bold orange]Successfully changed id[/bold orange]: {outcome}")
     if args.operation_type == "delete":
         outcome = delete_inventory(args.id)
+        console.print(f"[bold red]Successfully deleted id[/bold red]: {outcome}")
+    if args.operation_type =="obsolete":
+        outcome = remove_obsolete_inventory()
+        console.print(f"[bold blue]Successfully moved obsolete iventory to obsolete inventory ledger")
         
 if __name__ == "__main__":
     main()
