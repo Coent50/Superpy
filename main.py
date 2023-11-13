@@ -1,9 +1,6 @@
 # Imports
 import argparse
-import csv
 from rich.console import Console
-from rich.table import Table
-from datetime import date
 from reports import *
 from operations import *
 
@@ -38,35 +35,41 @@ operation_parser.add_argument("--expiration_date", type=str, help="specify the e
 operation_parser.add_argument("--id", type=int,help= "specify the id number")
 operation_parser.add_argument("--buy_date", type=str,help= "specify the date on which the item was bought")
 
+#time subparser enables the user to set and advance the internal date of superpy 
+time_parser = sub_parser.add_parser("time", help="enables the user to set and advance the time")
+time_parser.add_argument("time_operation", type=str, help="specify what you want to do with the time")
+time_parser.add_argument("--date", type=str, help= "please specify to which date you want to set the time in the following format YYYY-MM-DD")
+time_parser.add_argument ("--days", type=int, help="specify the amount of days by which you want to advance the time")
+
+
+
 args = parser.parse_args()
 
 # if statments related to the report subparser after choosing report the users has to specify what report they would like to see
 if args.command == "report":
-    if args.report_type == "inventory": #provides a report on all entries in the inventory ledger at a given moment
-        outcome = inventory_report()
-    if args.report_type == "sales": #provides a report on all entries in the sales ledger at a given moment
-        outcome = sales_report()
-    if args.report_type == "product": #provides a report on what products are held and how many of them are held at a given moment
+    if args.report_type == "inventory": 
+        outcome = inventory_report(args.date)
+    if args.report_type == "sales": 
+        outcome = sales_report(args.date)
+    if args.report_type == "product": 
         outcome = product_report()
-    if args.report_type == "expired": #provides a report on which items have expired
+    if args.report_type == "expired": 
         outcome = expired_report()
-    if args.report_type == "revenue": #provides a report on the revenue at a given moment 
+    if args.report_type == "revenue":  
         outcome = revenue_report(args.date)
-    if args.report_type == "profit": #provides a report on the profit at a given moment
+    if args.report_type == "profit": 
         outcome = profit_report(args.date)
     if args.report_type == "monthly":
-        outcome = monthly_report(args.period)
+        outcome = monthly_report(args.period) 
         console.print(f"[bold green]Your report was created succesfully and has been stored in the current working directory")
 
-# if statements related to operation subparser users have to choose the operatioon they want to perfom 
+# if statements related to operation subparser users have to choose the operation they want to perfom 
 # There are also several optional arguments that can be used based on the type of operation you want to perform
 if args.command == "operation":
     if args.operation_type == "buy":
          outcome = buy_inventory(args.product_name, args.buy_price, args.expiration_date)
-         console.print(f"[bold green]Successfully bought[/bold green]: {outcome}")
     if args.operation_type == "sell":
         outcome = sell_inventory(args.product_name, args.sell_price)
-        console.print(f"[bold blue]Successfully sold[/bold blue]: {outcome}")
     if args.operation_type =="change":
         outcome = change_data_inventory(args.id, args.product_name, args.buy_date, args.buy_price, args.expiration_date)
         console.print(f"[bold orange]Successfully changed id[/bold orange]: {outcome}")
@@ -76,6 +79,17 @@ if args.command == "operation":
     if args.operation_type =="obsolete":
         outcome = remove_obsolete_inventory()
         console.print(f"[bold blue]Successfully moved obsolete iventory to obsolete inventory ledger")
+
+# if statements related to the time subparser
+if args.command == "time":
+    if args.time_operation == "set":
+        outcome = set_time(args.date)
+        console.print(f'[bold green] Date succesfully set to {outcome}')
+    if args.time_operation == "advance":
+        outcome = advance_time(args.days)
+    if args.time_operation == "current":
+        outcome = current_time()
+        console.print(f'[bold purple] The current internal date of superpy is {outcome}')
         
 if __name__ == "__main__":
     main()
