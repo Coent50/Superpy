@@ -21,25 +21,25 @@ sub_parser = parser.add_subparsers(dest = "command", help="specify what operatio
 
 # report subparser enbales the users to call a set of different report regarding the inventory/sales/revenue/profit
 report_parser = sub_parser.add_parser("report", help="enables the user to select a number of different reports")
-report_parser.add_argument("report_type", type=str, help="specify the type of report you want to acces")
-report_parser.add_argument("--date", type=str, help="specify the date on which superpy needs to report")
-report_parser.add_argument("--period", type=str, help="specify the year followed by the month for which you would like to access the monthly reporty")
+report_parser.add_argument("report_type", type=str, help="specify the type of report you want to acces", choices=['inventory','sales','product','expired','revenue','profit','monthly'])
+report_parser.add_argument("-d","--date", type=str, help="specify the date on which superpy needs to report")
+report_parser.add_argument("-p","--period", type=str, help="specify the year followed by the month for which you would like to access the monthly reporty")
 
 # operation subparser enables the user to buy/sell/change inventory 
 operation_parser = sub_parser.add_parser ("operation", help="enables the user to perfom a set of operations")
-operation_parser.add_argument("operation_type", type=str, help= "specify the type of operation")
-operation_parser.add_argument("--product_name", type=str, help="specify the name of the product")
-operation_parser.add_argument("--buy_price", type=float, help="specify the price for which the product is bought as a float (decimal number)")
-operation_parser.add_argument("--sell_price", type=float, help="specify the price for which the product is sold as a float (decimal number)")
-operation_parser.add_argument("--expiration_date", type=str, help="specify the experation date of the product")
+operation_parser.add_argument("operation_type", type=str, help= "specify the type of operation", choices= ['buy', 'sell', 'change', 'delete', 'obsolete'])
+operation_parser.add_argument("-pn","--product_name", type=str, help="specify the name of the product")
+operation_parser.add_argument("-bp","--buy_price", type=float, help="specify the price for which the product is bought as a float (decimal number)")
+operation_parser.add_argument("-sp","--sell_price", type=float, help="specify the price for which the product is sold as a float (decimal number)")
+operation_parser.add_argument("-ed","--expiration_date", type=str, help="specify the experation date of the product")
 operation_parser.add_argument("--id", type=int,help= "specify the id number")
-operation_parser.add_argument("--buy_date", type=str,help= "specify the date on which the item was bought")
+operation_parser.add_argument("-bd","--buy_date", type=str,help= "specify the date on which the item was bought")
 
 #time subparser enables the user to set and advance the internal date of superpy 
 time_parser = sub_parser.add_parser("time", help="enables the user to set and advance the time")
-time_parser.add_argument("time_operation", type=str, help="specify what you want to do with the time")
-time_parser.add_argument("--date", type=str, help= "please specify to which date you want to set the time in the following format YYYY-MM-DD")
-time_parser.add_argument ("--days", type=int, help="specify the amount of days by which you want to advance the time")
+time_parser.add_argument("time_operation", type=str, help="specify what you want to do with the time", choices= ['set','advance','current'])
+time_parser.add_argument("-d","--date", type=str, help= "please specify to which date you want to set the time in the following format YYYY-MM-DD")
+time_parser.add_argument ("-ds","--days", type=int, help="specify the amount of days by which you want to advance the time")
 
 
 
@@ -65,6 +65,19 @@ if args.command == "report":
 
 # if statements related to operation subparser users have to choose the operation they want to perfom 
 # There are also several optional arguments that can be used based on the type of operation you want to perform
+if args.command == "operation":
+    if args.operation_type == "buy" and (args.product_name is None or args.buy_price is None or args.expiration_date is None):
+        parser.error("For 'buy' operation, you must provide --product_name, --buy_price, and --expiration_date.")
+    elif args.operation_type == "sell" and (args.product_name is None or args.sell_price is None):
+        parser.error("For 'sell' operation, you must provide --product_name and --sell_price.")
+    elif args.operation_type == "change" and (args.id is None or args.product_name is None or args.buy_date is None or args.buy_price is None or args.expiration_date is None):
+        parser.error("For 'change' operation, you must provide --id, --product_name, --buy_date, --buy_price, and --expiration_date.")
+    elif args.operation_type == "delete" and args.id is None:
+        parser.error("For 'delete' operation, you must provide --id.")
+    elif args.operation_type == "obsolete":
+    
+        pass
+
 if args.command == "operation":
     if args.operation_type == "buy":
          outcome = buy_inventory(args.product_name, args.buy_price, args.expiration_date)

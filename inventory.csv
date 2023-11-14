@@ -1,3 +1,4 @@
 id,product_name,buy_date,buy_price,expiration_date
 2,banana,2023-11-14,10.0,2024-11-31
-3,orange,2023-11-14,2.0,2023-12-23
+3,foie-gras,2023-11-14,18.0,2023-12-29
+4,foie-gras,2023-11-14,128.0,2023-12-29
