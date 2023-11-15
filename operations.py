@@ -9,7 +9,7 @@ def main():
 with open('time.txt', 'r') as time: #opening the time.txt file to make the internal time of Superpy available to the functions
         current_date = time.readline()
 
-def buy_inventory(product_name,buy_price, expiration_date): # This function enables the user to add new data entries to the inventory 
+def buy_inventory(product_name,buy_price, expiration_date, amount=None): # This function enables the user to add new data entries to the inventory 
     console = Console()
     with open('inventory.csv', 'r+', newline='') as inventory: #opening the csv file with r+ in order to read and to write to the file. 
         reader = csv.DictReader(inventory)
@@ -23,10 +23,18 @@ def buy_inventory(product_name,buy_price, expiration_date): # This function enab
             if int(row["id"]) > max_id:
                 max_id = int(row["id"])
 
-        new_id = max_id + 1 # adds + 1 to the current highest id number 
-        new_row = {'id': new_id, 'product_name': product_name, 'buy_date': buy_date, 'buy_price': buy_price, 'expiration_date': expiration_date}
-        rows.append(new_row) # Adds a new row to the inventory based on the generated id number and the users data input regarding the product
-        console.print(f"[bold green]Successfully bought: {product_name}")
+        new_rows = []
+        if amount is None:
+            amount = 1
+
+        for amount in range(amount):
+         new_id = max_id + 1 # adds + 1 to the current highest id number 
+         new_row = {'id': new_id, 'product_name': product_name, 'buy_date': buy_date, 'buy_price': buy_price, 'expiration_date': expiration_date}
+         rows.append(new_row) # Adds a new row to the inventory based on the generated id number and the users data input regarding the product
+         console.print(f"[bold green]Successfully bought: {product_name}")
+         max_id += 1
+
+        rows.extend(new_rows)
 
         inventory.seek(0) #used to start writing from the top of the csv file. 
         writer = csv.DictWriter(inventory, fieldnames=reader.fieldnames)
